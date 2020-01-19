@@ -30,7 +30,6 @@ int main(void)
 
     longest_safe_cluster_start_address = get_longest_safe_zone_or_null(cab_start_address, CAB_LENGTH, cluster_start_addresses, cluster_lengths, 5, out_longest_length_p);
 
-    printf("%d\n", out_longest_length);
     assert(out_longest_length == 15);
     assert(longest_safe_cluster_start_address == cab_start_address + 18);
 
