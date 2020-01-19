@@ -5,7 +5,7 @@ const char* get_longest_safe_zone_or_null(const char* const cab_start_location, 
 {
     const char* start_address = cab_start_location;
     const char* end_address = cab_start_location + cab_length - 1;
-    const char* longest_cluster_start_address;
+    const char* longest_cluster_start_address = NULL;
     size_t longest_length = 0;
     const char* temp_start_address;
     const char* temp_safe_zone_start_address;
@@ -52,18 +52,18 @@ int get_travel_time(const char* const cab_start_location, const size_t cab_lengt
     size_t danger_zone_count = 0;
     double travel_time;
 
-    for (temp_start_address = start_address; temp_start_address < end_address + 1; temp_start_address++) {
+    for (temp_start_address = start_address; temp_start_address < end_address + 1; ++temp_start_address) {
         size_t i;
-        for (i = 0; i < cluster_count; i++) {
+        for (i = 0; i < cluster_count; ++i) {
             if (temp_start_address >= cluster_start_locations[i] && temp_start_address <= cluster_start_locations[i] + cluster_lengths[i] - 1) {
-                layer++;
+                ++layer;
             }
         }
 
         if (layer % 2 == 0) {
-            safe_zone_count++;
+            ++safe_zone_count;
         } else {
-            danger_zone_count++;
+            ++danger_zone_count;
         }
 
         layer = 0;

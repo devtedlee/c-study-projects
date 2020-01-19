@@ -37,5 +37,7 @@ int main(void)
 
     assert(time_in_mins == 7);
 
+    longest_safe_cluster_start_address = get_longest_safe_zone_or_null(NULL, 0, NULL, NULL, 0, out_longest_length_p);
+
 	return 0;
 }
