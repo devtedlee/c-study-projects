@@ -1,12 +1,18 @@
 #ifndef POMOKU_H
 #define POMOKU_H
  
+#include <stddef.h>
+ 
 #define TRUE (1)
 #define FALSE (0)
  
+#define MAX_BOARD_SIZE 20
+#define MIN_BOARD_SIZE 10
+ 
 typedef enum color {
     COLOR_BLACK,
-    COLOR_WHITE
+	COLOR_WHITE,
+	COLOR_EMPTY
 } color_t;
  
 void init_game(void);
@@ -40,11 +46,12 @@ int copy_row(const color_t color, const size_t src, const size_t dst);
  
 int copy_column(const color_t color, const size_t src, const size_t dst);
  
-/* custom function */
-void add_score(const color_t color, const size_t row, const size_t col);
+int check_score(color_t color, int score);
  
-void print_board(void);
-
+void reduce_score(color_t color, int score);
+ 
+int recursive_check_place_stone(color_t color, int row, int col, int dx, int dy, int* stone_number, int* new_score);
+ 
 int check_range(int x, int y);
-
+ 
 #endif /* POMOKU_H */
