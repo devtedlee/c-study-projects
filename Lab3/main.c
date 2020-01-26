@@ -223,5 +223,7 @@ int main(void)
     ClustersFullOverlap();
     MultipleClustersNoOverlap();
     MultipleClustersOverlap();
+
+    assert(0);
     return 0;
 }
