@@ -44,5 +44,7 @@ int copy_column(const color_t color, const size_t src, const size_t dst);
 void add_score(const color_t color, const size_t row, const size_t col);
  
 void print_board(void);
- 
+
+int check_range(int x, int y);
+
 #endif /* POMOKU_H */

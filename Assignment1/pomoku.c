@@ -164,6 +164,15 @@ int place_stone(const color_t color, const size_t row, const size_t col)
     
     return TRUE;
 }
+
+int check_range(int x, int y)
+{
+    if (x >= 0 && x < (int)s_board_col && y >= 0 && y < (int)s_board_row) {
+        return TRUE;
+    } else {
+        return FALSE;
+    }
+}
  
 /* special moves */
 int insert_row(const color_t color, const size_t row)
