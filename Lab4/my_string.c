@@ -65,30 +65,26 @@ int index_of(const char* str, const char* word)
  
 void reverse_by_words(char* str)
 {
-    char* end;
- 
-    while (TRUE) {
-        end = str;
-        while (*end != ' ' && *end != '\0') {
-            end++;
-        }
-        end--;
-        while (str < end) {
-            *str = *str ^ *end;
-            *end = *str ^ *end;
-            *str = *str ^ *end;
-            str++;
-            end--;
-        }
-        while (TRUE) {
-            if (*str == '\0') {
-                return;
+    char temp = '\0';
+    size_t i;
+    size_t string_length = 0;
+    size_t length_count = 0; /* start_index + length_count로 last index를 구할 수 있다. */
+    size_t start_index = 0;  /* 단어 위치변경 배열의 첫인덱스 */
+    size_t last_index = 0;  /* 단어 위치변경 배열의 마지막인덱스 */
+    
+    string_length = get_string_length(str);
+    
+    for (i = 0; i <= string_length; i++) {
+        length_count++;
+        if (str[i] == ' ' || str[i] == '\0') { /* 공백기준으로 탐색을 진행하고, 마지막문자는 공백이 아닌 NULL을 가기 때문에 */
+            start_index = (i + 1) - length_count; /* i가 멈춘 위치 - 길이 + 1 = 시작위치 */
+            last_index = start_index + length_count - 2; /* 공백위치 빼고, 배열인덱스 빼고 = -2 */
+            while (start_index < last_index) { /* arr[1] arr[2] arr[3] arr[4]  1,4랑바꾸고 2,3이랑 바꾸면 된다. */
+                temp = str[start_index];
+                str[start_index++] = str[last_index];
+                str[last_index--] = temp;
             }
-            if (*str == ' ') {
-                str++;
-                break;
-            }
-            str++;
+            length_count = 0; /* 초기화 */
         }
     }
 }
