@@ -30,6 +30,7 @@ static void test_insert(void)
 
     for (i = 0; i < 12; i++)
     {
+        printf("%d, %d\n", expected_result[i], numbers[i]);
         assert(expected_result[i] == numbers[i]);
     }
 }

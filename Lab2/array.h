@@ -22,4 +22,8 @@ int insert(int numbers[], const size_t element_count, const int num, const size_
 
 int remove_at(int numbers[], const size_t element_count, const size_t index);
 
+enum {
+    FAILED = -1
+};
+
 #endif /* ARRAY_H */
