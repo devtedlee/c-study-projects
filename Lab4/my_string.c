@@ -1,41 +1,24 @@
+#include <stddef.h>
 #include "my_string.h"
-#include <stdio.h>
  
-static char* g_start_position = NULL;
-static char* g_next_position = NULL;
-static size_t g_string_length = 0;
- 
-size_t get_string_length(const char* str)
-{
-    const char* p = str;
-    size_t count = 0;
-    
-    if (str == NULL) {
-        return 0;
-    }
-    while (*p++ != '\0') {
-        count++;
-    }
-    
-    return count;
-}
+static char* s_buffer = NULL;
  
 void reverse(char* str)
 {
-    size_t i;
-    size_t string_length = 0;
-    char temp;
+    char* end = str - 2;
  
-    string_length = get_string_length(str);
-    
-    for (i = 0; i < string_length / 2; i++) {
-        temp = str[i];
-        str[i] = str[string_length - 1 - i]; /* 문자열 마지막은 NULL이므로 NULL 이전문자부터 교환 시작 */
-        str[string_length - 1 - i] = temp;
+    while (*(++end + 1) != '\0') {
+    }
+ 
+    while (str < end) {
+        *str = *str ^ *end;
+        *end = *str ^ *end;
+        *str = *str ^ *end;
+        str++;
+        end--;
     }
 }
  
-/* 문자열 조작, 두 문자열 비교 강의 영상 참조 */
 int index_of(const char* str, const char* word)
 {
     size_t i;
@@ -60,112 +43,109 @@ int index_of(const char* str, const char* word)
  
 void reverse_by_words(char* str)
 {
-    char temp = '\0';
-    size_t i;
-    size_t string_length = 0;
-    size_t length_count = 0; /* start_index + length_count로 last index를 구할 수 있다. */
-    size_t start_index = 0;  /* 단어 위치변경 배열의 첫인덱스 */
-    size_t last_index = 0;  /* 단어 위치변경 배열의 마지막인덱스 */
-    
-    string_length = get_string_length(str);
-    
-    for (i = 0; i <= string_length; i++) {
-        length_count++;
-        if (str[i] == ' ' || str[i] == '\0') { /* 공백기준으로 탐색을 진행하고, 마지막문자는 공백이 아닌 NULL을 가기 때문에 */
-            start_index = (i + 1) - length_count; /* i가 멈춘 위치 - 길이 + 1 = 시작위치 */
-            last_index = start_index + length_count - 2; /* 공백위치 빼고, 배열인덱스 빼고 = -2 */
-            while (start_index < last_index) { /* arr[1] arr[2] arr[3] arr[4]  1,4랑바꾸고 2,3이랑 바꾸면 된다. */
-                temp = str[start_index];
-                str[start_index++] = str[last_index];
-                str[last_index--] = temp;
+    char* end;
+ 
+    while (TRUE) {
+        end = str;
+        while (*end != ' ' && *end != '\0') {
+            end++;
+        }
+        end--;
+        while (str < end) {
+            *str = *str ^ *end;
+            *end = *str ^ *end;
+            *str = *str ^ *end;
+            str++;
+            end--;
+        }
+        while (TRUE) {
+            if (*str == '\0') {
+                return;
             }
-            length_count = 0; /* 초기화 */
+            if (*str == ' ') {
+                str++;
+                break;
+            }
+            str++;
         }
     }
 }
  
-/* 문자열 토큰화 강의 참조 */
 char* tokenize(char* str, const char* delims)
 {
-    char* temp = NULL;
-    size_t i;
-    
-    if (g_string_length == 0) {
-        g_string_length = get_string_length(str);
-    } else {
-        g_string_length = get_string_length(g_next_position);
+    const char* delims_ptr;
+    char* buffer_ptr;
+    char* token_ptr;
+ 
+    if (str != NULL) {
+        s_buffer = str;
     }
  
-    /* 순수 NULL이 들어오는 경우 */
-    if (str == NULL && g_string_length == 0) {
+    if (s_buffer == NULL || *s_buffer == '\0') {
         return NULL;
     }
-    /* 처음문자 토큰 반환 이후 처리 구문 */
-    if (str == NULL && g_string_length != 0) {
-        g_start_position = g_next_position;
-    } else if (str != NULL && g_string_length != 0) {
-        g_start_position = str; /* 첫 문자열이 들어오면 시작점을 문자열 처음으로 넣어준다. */
-    }
-    
-    for (i = 0; i < g_string_length; i++) {
-        if (g_start_position[i] == *delims) {
-            g_start_position[i] = '\0';
-            g_next_position = g_start_position + i + 1; /* 배열의 인덱스 + null의 다음요소로 인해 + 1 */
-            return g_start_position;
+ 
+    buffer_ptr = s_buffer;
+ 
+    while (TRUE) {
+        if (*buffer_ptr == '\0') {
+            s_buffer = NULL;
+            return NULL;
         }
-        /* 마지막 문자열 탐색에서 모든 변수 초기화 */
-        if (i == g_string_length - 1) {
-            temp = g_start_position;
-            g_start_position = NULL;
-            g_next_position = NULL;
-            g_string_length = 0;
-            return temp;
+ 
+        delims_ptr = delims;
+        while (*delims_ptr != '\0') {
+            if (*delims_ptr == *buffer_ptr) {
+                break;
+            }
+            delims_ptr++;
         }
+ 
+        if (*delims_ptr == '\0') {
+            break;
+        }
+ 
+        buffer_ptr++;
     }
  
-    return NULL;
+    token_ptr = buffer_ptr;
+ 
+    while (TRUE) {
+        if (*buffer_ptr == '\0') {
+            s_buffer = NULL;
+            return token_ptr;
+        }
+ 
+        delims_ptr = delims;
+        while (*delims_ptr != '\0') {
+            if (*delims_ptr == *buffer_ptr) {
+                break;
+            }
+            delims_ptr++;
+        }
+ 
+        if (*delims_ptr != '\0') {
+            break;
+        }
+ 
+        buffer_ptr++;
+    }
+ 
+    *buffer_ptr = '\0';
+ 
+    s_buffer = buffer_ptr + 1;
+    return token_ptr;
 }
  
-/* tokenize 함수과 str을 공유한다. */
 char* reverse_tokenize(char* str, const char* delims)
 {
-    char* temp = NULL;
-    size_t i;
-    
-    reverse_by_words(g_next_position);
+    char* token = tokenize(str, delims);
  
-    if (g_string_length == 0) {
-        g_string_length = get_string_length(str);
-    } else {
-        g_string_length = get_string_length(g_next_position);
-    }
- 
-    /* 순수 NULL이 들어오는 경우 */
-    if (str == NULL && g_string_length == 0) {
+    if (token == NULL) {
         return NULL;
     }
-    /* 처음문자 토큰 반환 이후 처리 구문 */
-    if (str == NULL && g_string_length != 0) {
-        g_start_position = g_next_position;
-    } else if (str != NULL && g_string_length != 0) {
-        g_start_position = str; /* 첫 문자열이 들어오면 시작점을 문자열 처음으로 넣어준다. */
-    }
  
-    for (i = 0; i < g_string_length; i++) {
-        if (g_start_position[i] == *delims) {
-            g_start_position[i] = '\0';
-            g_next_position = g_start_position + i + 1; /* 배열의 인덱스 + null의 다음요소로 인해 + 1 */
-            return g_start_position;
-        }
-        /* 마지막 문자열 탐색에서 모든 변수 초기화 */
-        if (i == g_string_length - 1) {
-            temp = g_start_position;
-            g_start_position = NULL;
-            g_next_position = NULL;
-            g_string_length = 0;
-            return temp;
-        }
-    }
+    reverse(token);
  
-    return NULL;
+    return token;
 }

@@ -28,6 +28,7 @@ int main(void)
     assert(index_of(str, "a") == 3);
     assert(index_of(str, "sub") == 24);
     assert(index_of(str, "live") == 7);
+    printf("%d\n", index_of(NULL, NULL));
     assert(index_of(str, "") == 0);
     assert(index_of(test, "live") == -1);
 
