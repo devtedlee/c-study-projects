@@ -42,10 +42,15 @@ int index_of(const char* str, const char* word)
         str_length = get_str_length(str);
         word_length = get_str_length(word);
     } 
+
+    if (word == NULL)
+    {
+        return -1;
+    }
     
-    if (*word == '\0' || word == NULL) {
+    if (*word == '\0') {
         return 0;
-    } 
+    }
  
     str_length = get_str_length(str);
     word_length = get_str_length(word);
