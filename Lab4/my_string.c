@@ -36,7 +36,7 @@ int index_of(const char* str, const char* word)
     size_t word_length = 0;
     size_t count = 0;
     
-    if (str == NULL) {
+    if (str == NULL || word == NULL) {
         return -1;
     } else if (str != NULL) {
         str_length = get_str_length(str);
