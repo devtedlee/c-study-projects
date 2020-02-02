@@ -43,11 +43,6 @@ int index_of(const char* str, const char* word)
         word_length = get_str_length(word);
     } 
 
-    if (word == NULL)
-    {
-        return -1;
-    }
-    
     if (*word == '\0') {
         return 0;
     }
@@ -68,19 +63,12 @@ int index_of(const char* str, const char* word)
             } else {
                 count = 0;
                 word_p = word;
-                if (*word_p == *str_p) {
-                    word_p += 1;
-                    count += 1;
-                    if (count == word_length) {
-                        break;
-                    }
-                }
             }
             str_p += 1;
         }
         if (count == word_length) {
-            printf("%d\n", ((str_p - str) / sizeof(char)) - word_length + 1);
-            return ((str_p - str) / sizeof(char)) - word_length + 1;
+            printf("%d\n", ((str_p - str)) - word_length + 1);
+            return ((str_p - str)) - word_length + 1;
         } else {
             return -1;
         }
