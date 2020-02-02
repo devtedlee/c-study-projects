@@ -2,7 +2,22 @@
 #include "my_string.h"
  
 static char* s_buffer = NULL;
- 
+
+size_t get_string_length(const char* str)
+{
+    const char* p = str;
+    size_t count = 0;
+    
+    if (str == NULL) {
+        return 0;
+    }
+    while (*p++ != '\0') {
+        count++;
+    }
+    
+    return count;
+}
+
 void reverse(char* str)
 {
     char* end = str - 2;
