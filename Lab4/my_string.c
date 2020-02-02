@@ -1,259 +1,151 @@
 #include <stdio.h>
 #include "my_string.h"
-
-static char* s_current_token;
-
+ 
+size_t get_str_length(const char* str)
+{
+    size_t count = 0;
+    const char* p = str;
+ 
+    while (*p++ != '\0') {
+        ++count;
+    }
+    return count;
+}
+ 
 void reverse(char* str)
 {
-    size_t i = 0;
-    size_t j;
-    char temp_char;
-
-    while (str[i] != NULL_CHAR) {
-        i++;
-    }
-
-    if (i < 2) {
-        return;
-    }
-    
-    j = i - 1;
-    i = 0;
-    
-    while (i < j) {
-        temp_char = str[i];
-        str[i] = str[j];
-        str[j] = temp_char;
-
-        i++;
-        j--;
+    size_t count = get_str_length(str);
+    char* p = str;
+    char* q = str + count - 1 ;
+ 
+    while (p < q) {
+        char temp = *p;
+        *p = *q;
+        *q = temp;
+ 
+        ++p;
+        --q;
     }
 }
-
+ 
 int index_of(const char* str, const char* word)
 {
-    size_t i = 0;
-    size_t j;
-    size_t k;
-    size_t word_length;
-
-    while (word[i] != NULL_CHAR) {
-        i++;
-    }
-
-    if (i < 1) {
+    const char* str_p = str;
+    const char* word_p = word;
+    size_t str_length = 0;
+    size_t word_length = 0;
+    size_t count = 0;
+    
+    if (str == NULL) {
+        return -1;
+    } else if (str != NULL) {
+        str_length = get_str_length(str);
+        word_length = get_str_length(word);
+    } 
+    
+    if (*word == '\0') {
         return 0;
-    }
-
-    word_length = i;
-    i = 0;
-
-    while (str[i] != NULL_CHAR) {
-        k = 0;
-        if (str[i] == word[k]) {
-            j = i;
-            while (k < word_length) {
-                if (str[j] == NULL_CHAR) {
-                    goto loop_end;
-                }
-
-                if (str[j] != word[k]) {
+    } 
+ 
+    str_length = get_str_length(str);
+    word_length = get_str_length(word);
+ 
+    if(str_length < word_length) {
+        return -1;
+    } else {
+        while (*str_p != '\0') {
+            if (*word_p == *str_p) {
+                word_p += 1;
+                count += 1;
+                if (count == word_length) {
                     break;
                 }
-
-                j++;
-                k++;
+            } else {
+                count = 0;
+                word_p = word;
+                if (*word_p == *str_p) {
+                    word_p += 1;
+                    count += 1;
+                    if (count == word_length) {
+                        break;
+                    }
+                }
             }
-
-            if (k >= word_length) {
-                return i;
-            }
+            str_p += 1;
         }
-
-        i++;
+        if (count == word_length) {
+            printf("%d\n", ((str_p - str) / sizeof(char)) - word_length + 1);
+            return ((str_p - str) / sizeof(char)) - word_length + 1;
+        } else {
+            return -1;
+        }
     }
-
-loop_end:
-    return -1;
 }
-
+ 
 void reverse_by_words(char* str)
 {
-    const char SPACE = ' ';
+    size_t count = get_str_length(str);
     size_t i = 0;
-    size_t j;
-    size_t k;
-    char temp_char;
-    size_t word_end;
-
-    while (str[i] != NULL_CHAR) {
-        j = i;
-
-        while (str[j] != SPACE && str[j] != NULL_CHAR) {
-            j++;
+    char* p = str;
+    char* q = str;
+ 
+    for (i = 0; i <= count; i++) {
+        if (*(str + i) == ' ' || *(str + i) == '\0') {
+            q = str + i - 1;
+            while (p < q) {
+                char temp = *p;
+                *p = *q;
+                *q = temp;
+                ++p;
+                --q;
+            }
+            p = str + i + 1;
         }
-        
-        word_end = j;
-        k = word_end - 1;
-        j = i;
-
-        while (j < k) {
-            temp_char = str[j];
-            str[j] = str[k];
-            str[k] = temp_char;
-
-            j++;
-            k--;
-        }
-        
-
-        if (str[word_end] == NULL_CHAR) {
-            break;
-        }
-
-        i = word_end + 1;
     }
 }
-
+ 
 char* tokenize(char* str, const char* delims)
 {
-    char* token_start;
-    char* temp_pointer;
-    size_t i;
-    size_t delim_flag;
-
-    if (str == NULL) {
-        if (s_current_token == NULL) {
-            return NULL;
+    static char* s_str = NULL;
+    size_t str_length = 0;
+    size_t delims_lenght = 0;
+    size_t toggle = 0;
+    size_t i = 0;
+    size_t j = 0;
+ 
+    if (str != NULL) {
+        s_str = str;
+    } else if (str == NULL) {
+        str = s_str;
+        if(str == NULL) {
+            goto return_str;
         }
-
-        str = s_current_token;
     }
-
-    token_start = str;
-
-    while (*str != NULL_CHAR) {
-        for (i = 0; delims[i] != NULL_CHAR; i++) {
-            if (*str == delims[i]) {
-                temp_pointer = str + 1;
-                *str = NULL_CHAR;
-                str = temp_pointer;
-
-                goto get_token_loop_exit;
+ 
+    str_length = get_str_length(str);
+    delims_lenght = get_str_length(delims);
+ 
+    for (i = 0; i < str_length; i++) {
+        for (j = 0; j <= delims_lenght; j++) {
+            if (*(str + i) == *(delims + j)) {
+                toggle = 1;
+                *(str + i) = '\0';
+                s_str = str + i + 1;
+                break;                
+            } else if (toggle == 1 && *(delims + j) == '\0') {
+                toggle = 0;
+                goto return_str;
             }
         }
-
-        str++;
     }
-
-    s_current_token = NULL;
-    return token_start;
-
-get_token_loop_exit:
-
-    while (*str != NULL_CHAR) {
-        delim_flag = 0;
-        for (i = 0; delims[i] != NULL_CHAR; i++) {
-            if (*str == delims[i]) {
-                delim_flag++;
-            }
-        }
-
-        if (delim_flag == 0) {
-            s_current_token = str;
-            break;
-        }
-
-        str++;
-    }
-
-    if (*str == NULL_CHAR) {
-        s_current_token = NULL;
-    }
-
-    return token_start;
+ 
+    return_str:
+        return str;
 }
-
+ 
 char* reverse_tokenize(char* str, const char* delims)
 {
-    char* token_start;
-    char* temp_pointer;
-    char temp_char;
-    size_t i;
-    size_t j = 0;
-    size_t k = 0;
-
-    if (str == NULL) {
-        if (s_current_token == NULL) {
-            return NULL;
-        }
-
-        str = s_current_token;
-    }
-
-    token_start = str;
-
-    while (*str != NULL_CHAR) {
-        for (i = 0; delims[i] != NULL_CHAR; i++) {
-            if (*str == delims[i]) {
-                k--;
-                while (j < k) {
-                    temp_char = token_start[j];
-                    token_start[j] = token_start[k];
-                    token_start[k] = temp_char;
-
-                    j++;
-                    k--;
-                }
-
-                temp_pointer = str + 1;
-                *str = NULL_CHAR;
-                str = temp_pointer;
-
-                goto get_token_loop_exit;
-            }
-        }
-
-        str++;
-        k++;
-
-        if (*str == NULL_CHAR) {
-            k--;
-            while (j < k) {
-                temp_char = token_start[j];
-                token_start[j] = token_start[k];
-                token_start[k] = temp_char;
-
-                j++;
-                k--;
-            }
-        }
-    }
-
-    s_current_token = NULL;
-    return token_start;
-
-get_token_loop_exit:
-
-    while (*str != NULL_CHAR) {
-        j = 0;
-        for (i = 0; delims[i] != NULL_CHAR; i++) {
-            if (*str == delims[i]) {
-                j++;
-            }
-        }
-
-        if (j == 0) {
-            s_current_token = str;
-            break;
-        }
-
-        str++;
-    }
-
-    if (*str == NULL_CHAR) {
-        s_current_token = NULL;
-    }
-    
-    return token_start;
+    char* init_token_p = tokenize(str, delims);
+    reverse(init_token_p);
+    return init_token_p;
 }

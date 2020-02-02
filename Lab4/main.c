@@ -10,8 +10,12 @@ int main(void)
     char* token;
     char test[1];
 
+
     strncpy(str_cpy, str, 33);
     str_cpy[33] = '\0';
+
+
+    printf("%d\n", sizeof(char));
 
     test[0] = '\0';
     reverse(test);
