@@ -1,12 +1,4 @@
-#include <stdio.h>
-#include "translate.h"
-
-int main(int argc, const char* argv[])
+int main(void)
 {
-    int result;
-
-    result = translate(argc, argv);
-    fprintf(stderr, "Error Code: %d \n", result);
-
-    return result;
+    return 0;
 }
