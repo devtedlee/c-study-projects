@@ -54,24 +54,29 @@ int index_of(const char* str, const char* word)
         return -1;
     } else {
         while (*str_p != '\0') {
-            if (*word_p == *str_p) {
-                word_p += 1;
-                count += 1;
-                if (count == word_length) {
+            const char* temp_str = str_p;
+            count = 0;
+            word_p = word;
+            while (*word_p != '\0') {
+                if (*word_p != *temp_str) {
                     break;
                 }
-            } else {
-                count = 0;
-                word_p = word;
+
+                word_p += 1;
+                count += 1;
+
+                if (*word_p == '\0') {
+                    printf("%dcheck\n", word_length);
+                    return ((temp_str - str)) - word_length + 1;
+                }
+
+                ++temp_str;
             }
+
             str_p += 1;
         }
-        if (count == word_length) {
-            printf("%d\n", ((str_p - str)) - word_length + 1);
-            return ((str_p - str)) - word_length + 1;
-        } else {
-            return -1;
-        }
+
+        return -1;
     }
 }
  
