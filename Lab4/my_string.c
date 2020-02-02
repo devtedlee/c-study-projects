@@ -132,13 +132,43 @@ char* tokenize(char* str, const char* delims)
  
 char* reverse_tokenize(char* str, const char* delims)
 {
-    char* token = tokenize(str, delims);
+    char* temp = NULL;
+    size_t i;
+    
+    reverse_by_words(g_next_position);
  
-    if (token == NULL) {
-        return NULL;
+    if (g_string_length == 0) {
+        g_string_length = get_string_length(str);
+    } else {
+        g_string_length = get_string_length(g_next_position);
     }
  
-    reverse(token);
+    /* 순수 NULL이 들어오는 경우 */
+    if (str == NULL && g_string_length == 0) {
+        return NULL;
+    }
+    /* 처음문자 토큰 반환 이후 처리 구문 */
+    if (str == NULL && g_string_length != 0) {
+        g_start_position = g_next_position;
+    } else if (str != NULL && g_string_length != 0) {
+        g_start_position = str; /* 첫 문자열이 들어오면 시작점을 문자열 처음으로 넣어준다. */
+    }
  
-    return token;
+    for (i = 0; i < g_string_length; i++) {
+        if (g_start_position[i] == *delims) {
+            g_start_position[i] = '\0';
+            g_next_position = g_start_position + i + 1; /* 배열의 인덱스 + null의 다음요소로 인해 + 1 */
+            return g_start_position;
+        }
+        /* 마지막 문자열 탐색에서 모든 변수 초기화 */
+        if (i == g_string_length - 1) {
+            temp = g_start_position;
+            g_start_position = NULL;
+            g_next_position = NULL;
+            g_string_length = 0;
+            return temp;
+        }
+    }
+ 
+    return NULL;
 }
