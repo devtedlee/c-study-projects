@@ -10,16 +10,17 @@ int main(void)
     char* token;
     char test[1];
 
-
     strncpy(str_cpy, str, 33);
     str_cpy[33] = '\0';
 
     test[0] = '\0';
     reverse(test);
+
     reverse(str_cpy);
     assert(strcmp("enirambus wolley a ni evil lla eW", str_cpy) == 0);
     printf("%d\n", index_of(str, "all "));
 
+    printf("index: %d\n", index_of(str, "all "));
     assert(index_of(str, "all ") == 3);
 
     assert(index_of(str, "marine") == 27);
@@ -33,7 +34,6 @@ int main(void)
     assert(index_of(test, "live") == -1);
 
     reverse(str_cpy);
-
     assert(strcmp(str_cpy, str) == 0);
 
     reverse_by_words(str_cpy);
