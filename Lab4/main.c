@@ -33,6 +33,8 @@ int main(void)
     assert(index_of(str, "") == 0);
     assert(index_of(test, "live") == -1);
 
+    printf("WORD: %d\n", index_of(str, "Label"));
+
     reverse(str_cpy);
     assert(strcmp(str_cpy, str) == 0);
 

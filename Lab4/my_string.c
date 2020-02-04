@@ -54,10 +54,10 @@ int index_of(const char* str, const char* word)
         return 0;
     }
 
-    while (str_p != '\0') {
+    while (*str_p != '\0') {
         const char* temp_str = str_p;
 
-        while (word_p != '\0') {
+        while (*word_p != '\0') {
             if (*temp_str != *word_p) {
                 break;
             }
@@ -73,7 +73,7 @@ int index_of(const char* str, const char* word)
                 return FAILED;
             }
         }
-
+        
         word_p = word;
         ++str_p;
     }
