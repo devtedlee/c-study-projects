@@ -78,7 +78,7 @@ int index_of(const char* str, const char* word)
         ++str_p;
     }
 
-    return 0;
+    return FAILED;
 }
 
 void reverse_by_words(char* str)
