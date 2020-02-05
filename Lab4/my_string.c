@@ -39,16 +39,16 @@ void reverse(char* str)
 
 size_t _strlen(const char* s)
 {
-    const char* sP = s;
+    const char* s_p = s;
     if (s == NULL || *s == '\0') {
         return 0;
     }
 
-    while (*sP != '\0') {
-        ++sP;
+    while (*s_p != '\0') {
+        ++s_p;
     }
 
-    return (size_t)(sP - s);
+    return (size_t)(s_p - s);
 }
 
 int index_of(const char* str, const char* word)
@@ -62,7 +62,7 @@ int index_of(const char* str, const char* word)
     if (str == NULL) {
         return FAILED;
     }
-    
+
     if (word == NULL || *word == '\0') {
         return 0;
     }
@@ -99,11 +99,6 @@ int index_of(const char* str, const char* word)
             ++j;
         }
     }
-
-    for (i = 0; i < word_len; ++i) {
-        printf("%d,", word_indexs[i]);
-    }
-    printf("\n");
 
     return FAILED;
 }
