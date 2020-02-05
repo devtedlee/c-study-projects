@@ -114,6 +114,7 @@ char* tokenize(char* str, const char* delims)
     char* token = str;
     char* str_p = str;
     const char* delims_p = delims;
+    char* last_str_cut_point = NULL;
 
     if (str == NULL) {
         if (s_str == NULL) {
@@ -129,45 +130,35 @@ char* tokenize(char* str, const char* delims)
 
         while (*delims_p != '\0') {
             if (*str_p == *delims_p) {
-                *str_p = '\0';
-                
-                ++str_p;
-                goto find_chain_delim_str;
-            }
+                if (last_str_cut_point == NULL) {
+                    *str_p = '\0';
 
-            ++delims_p;
-        }
+                    last_str_cut_point = str_p;
 
-        ++str_p;
-    }
+                    break;
+                }
 
-    return token;
+                if (str_p - last_str_cut_point > 1) {
+                    goto loop_end;
+                }
 
-find_chain_delim_str:
-
-    while (*str_p != '\0') {
-        int flag = 0;
-        delims_p = delims;
-
-        while (*delims_p != '\0') {
-            if (*str_p == *delims_p) {
-                flag = 1;
-
+                last_str_cut_point = str_p;
                 break;
             }
 
             ++delims_p;
         }
 
-        if (flag == 0) {
-            break;
-        }
-
-        flag = 0;
         ++str_p;
     }
 
-    s_str = str_p;
+loop_end:
+    if (last_str_cut_point != NULL) {
+        s_str = last_str_cut_point + 1;
+    } else {
+        s_str = NULL;
+    }
+
     return token;
 }
 
