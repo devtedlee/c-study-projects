@@ -11,14 +11,11 @@ void reverse_pointer(char* start, char* end)
     char* str_end = end;
     char temp;
 
-    while (str_start != str_end) {
+    while (str_start < str_end) {
         temp = *str_start;
         *str_start = *str_end;
         *str_end = temp;
 
-        if (str_start + 1 == str_end) {
-            break;
-        }
         ++str_start;
         --str_end;
     }
@@ -29,7 +26,7 @@ void reverse(char* str)
     char* str_start = str;
     char* str_end = str;
 
-    if (*str_start == '\0' || str_start == NULL) {
+    if (str_start == NULL) {
         return;
     }
 

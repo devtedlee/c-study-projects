@@ -99,7 +99,30 @@ int main(void)
 
         for (i = 0; i < 14; ++i) {
             printf("char:%c, int:%d\n", str1_cpy[i], (int)str1_cpy[i]);
-        }
+        }        
+    }
+
+    {
+        const char* str1 = "asdf,.. jfdsf";
+        char str1_cpy[14];
+        char* token1;
+        size_t i;
+
+        strncpy(str1_cpy, str1, 14);
+        printf("str: %s\n", str1_cpy);
+
+        token1 = reverse_tokenize(str1_cpy, ",.");
+        printf("tkn: %s, %s\n", token1, str1_cpy);
+
+        token1 = reverse_tokenize(NULL, ",.");
+        printf("tkn: %s, %s\n", token1, str1_cpy);
+
+        token1 = reverse_tokenize(NULL, ",.");
+        printf("tkn: %s, %s\n", token1, str1_cpy);
+
+        for (i = 0; i < 14; ++i) {
+            printf("char:%c, int:%d\n", str1_cpy[i], (int)str1_cpy[i]);
+        }   
     }
 
     printf("Complete");
