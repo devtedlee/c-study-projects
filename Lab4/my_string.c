@@ -121,56 +121,55 @@ void reverse_by_words(char* str)
     }
 }
 
+int _contains(char c, const char* delims) {
+    const char *delims_p = delims;
+    while (*delims_p != '\0') {
+        if (c == *delims_p) {
+            return 1;
+        }
+
+        ++delims_p;
+    }
+
+    return 0;
+}
+
 static char* s_str = NULL;
 
 char* tokenize(char* str, const char* delims)
 {
-    char* token = str;
-    char* str_p = str;
-    const char* delims_p = delims;
-    char* last_str_cut_point = NULL;
+    char* token;
+    char* start = str;
+    char* end;
 
     if (str == NULL) {
         if (s_str == NULL) {
             return NULL;
         }
 
-        token = s_str;
-        str_p = s_str;
+        start = s_str;
     }
 
-    while (*str_p != '\0') {
-        delims_p = delims;
-
-        while (*delims_p != '\0') {
-            if (*str_p == *delims_p) {
-                if (last_str_cut_point == NULL) {
-                    *str_p = '\0';
-
-                    last_str_cut_point = str_p;
-
-                    break;
-                }
-
-                if (str_p - last_str_cut_point > 1) {
-                    goto loop_end;
-                }
-
-                last_str_cut_point = str_p;
-                break;
-            }
-
-            ++delims_p;
-        }
-
-        ++str_p;
+    while (*start != '\0' && _contains(*start, delims)) {
+        ++start;
     }
 
-loop_end:
-    if (last_str_cut_point != NULL) {
-        s_str = last_str_cut_point + 1;
-    } else {
+    if (*start == '\0') {
         s_str = NULL;
+        return NULL;
+    }
+
+    end = start + 1;
+    while (*end != '\0' && !_contains(*end, delims)) {
+        ++end;
+    }
+
+    token = start;
+    if (*end == '\0') {
+        s_str = NULL;
+    } else {
+        *end = '\0';
+        s_str = end +1;
     }
 
     return token;

@@ -135,6 +135,31 @@ int main(void)
         }   
     }
 
+    {
+        const char* str1 = "__123-:456::789__";
+        char str1_cpy[18];
+        char* token1;
+        size_t i;
+        strncpy(str1_cpy, str1, 17);
+        str1_cpy[17] = '\0';
+
+        token1 = tokenize(str1_cpy, "-_:");
+        printf("tkn1: %s, %s\n", token1, str1_cpy);
+
+        token1 = tokenize(NULL, "-_:");
+        printf("tkn1: %s, %s\n", token1, str1_cpy);
+
+        token1 = tokenize(NULL, "-_:");
+        printf("tkn1: %s, %s\n", token1, str1_cpy);
+
+        token1 = tokenize(NULL, "-_:");
+        printf("tkn1: %s, %s\n", token1, str1_cpy);
+
+        for (i = 0; i < 18; ++i) {
+            printf("char:%c, int:%d\n", str1_cpy[i], (int)str1_cpy[i]);
+        }        
+    }
+
     printf("Complete");
 
 	return 0;
