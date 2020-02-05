@@ -3,7 +3,7 @@
 
 enum {
     FAILED = -1,
-    MAX_WORD_LENGTH = 50
+    MAX_WORD_LENGTH = 100
 };
 
 void reverse_pointer(char* start, char* end)
