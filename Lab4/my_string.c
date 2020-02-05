@@ -2,7 +2,8 @@
 #include "my_string.h"
 
 enum {
-    FAILED = -1
+    FAILED = -1,
+    MAX_WORD_LENGTH = 50
 };
 
 void reverse_pointer(char* start, char* end)
@@ -36,42 +37,44 @@ void reverse(char* str)
     reverse_pointer(str, str_end - 1);
 }
 
-int index_of(const char* str, const char* word)
+size_t _strlen(const char* s)
 {
-    const char* str_p = str;
-    const char* word_p = word;
-
-    if (str_p == NULL) {
-        return FAILED;
-    }
-
-    if (word_p == NULL || *word_p == '\0') {
+    const char* sP = s;
+    if (s == NULL || *s == '\0') {
         return 0;
     }
 
-    while (*str_p != '\0') {
-        const char* temp_str = str_p;
+    while (*sP != '\0') {
+        ++sP;
+    }
 
-        while (*word_p != '\0') {
-            if (*temp_str != *word_p) {
+    return (size_t)(sP - s);
+}
+
+int index_of(const char* str, const char* word)
+{
+    int word_indexs[MAX_WORD_LENGTH] = { 0, };
+    size_t word_len = _strlen(word);
+    size_t i = 0;
+    size_t j = 0;
+    size_t pattern_count = 0;
+
+    for (i = 1; i < word_len; ++i) {
+        for (; j == 0 || i < word_len; ++j) {
+            if (word[i] == word[j]) {
+                word_indexs[i] = j + 1;
+
                 break;
             }
 
-            ++temp_str;
-            ++word_p;
-
-            if (*word_p == '\0') {
-                return str_p - str;
-            }
-
-            if (*temp_str == '\0') {
-                return FAILED;
-            }
+            j = word_indexs[j - 1];
         }
-        
-        word_p = word;
-        ++str_p;
     }
+
+    for (i = 0; i < word_len; ++i) {
+        printf("%d,", word_indexs[i]);
+    }
+    printf("\n");
 
     return FAILED;
 }

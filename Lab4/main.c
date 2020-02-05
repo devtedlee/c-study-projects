@@ -18,7 +18,17 @@ int main(void)
 
     reverse(str_cpy);
     assert(strcmp("enirambus wolley a ni evil lla eW", str_cpy) == 0);
-    printf("%d\n", index_of(str, "all "));
+    
+    {
+        const char* ss = "ABCDABCDABEE";
+        char ss_cpy[13];
+        strncpy(ss_cpy, ss, 12);
+        ss_cpy[12] = '\0';
+
+        printf("r: %d\n", index_of(ss_cpy, "ABABABAC"));
+    }
+
+    assert(0);
 
     printf("index: %d\n", index_of(str, "all "));
     assert(index_of(str, "all ") == 3);
