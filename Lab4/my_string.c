@@ -68,20 +68,12 @@ int index_of(const char* str, const char* word)
     }
 
     for (i = 1; i < word_len; ++i) {
+        while (j > 0 && word[i] != word[j]) {
+            j = word_indexs[j - 1];
+        }
+        
         if (word[i] == word[j]) {
-            ++j;
-            word_indexs[i] = j;
-
-            continue;
-        }
-
-        if (i > 1 && j == 0) {
-            word_indexs[i] = 0;
-            continue;
-        }
-
-        if (i > 2) {
-            j = word_indexs[j - 2];
+            word_indexs[i] = ++j;
         }
     }
 
