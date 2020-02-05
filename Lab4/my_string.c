@@ -23,19 +23,17 @@ void reverse_pointer(char* start, char* end)
 
 void reverse(char* str)
 {
-    char* str_start = str;
     char* str_end = str;
 
-    if (str_start == NULL) {
+    if (str == NULL) {
         return;
     }
 
     while (*str_end != '\0') {
         ++str_end;
     }
-    str_end = *str_end == '\0' ? --str_end : str_end; 
 
-    reverse_pointer(str_start, str_end);
+    reverse_pointer(str, str_end - 1);
 }
 
 int index_of(const char* str, const char* word)
