@@ -20,7 +20,7 @@ int main(void)
     assert(strcmp("enirambus wolley a ni evil lla eW", str_cpy) == 0);
     
     {
-        const char* ss = "ABCDABCDABEE";
+        const char* ss = "CDABABABABAC";
         char ss_cpy[13];
         strncpy(ss_cpy, ss, 12);
         ss_cpy[12] = '\0';
@@ -28,7 +28,6 @@ int main(void)
         printf("r: %d\n", index_of(ss_cpy, "ABABABAC"));
     }
 
-    assert(0);
 
     printf("index: %d\n", index_of(str, "all "));
     assert(index_of(str, "all ") == 3);

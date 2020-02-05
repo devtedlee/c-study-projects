@@ -54,20 +54,49 @@ size_t _strlen(const char* s)
 int index_of(const char* str, const char* word)
 {
     int word_indexs[MAX_WORD_LENGTH] = { 0, };
+    size_t str_len = _strlen(str);
     size_t word_len = _strlen(word);
     size_t i = 0;
     size_t j = 0;
-    size_t pattern_count = 0;
+
+    if (str == NULL) {
+        return FAILED;
+    }
+    
+    if (word == NULL || *word == '\0') {
+        return 0;
+    }
 
     for (i = 1; i < word_len; ++i) {
-        for (; j == 0 || i < word_len; ++j) {
-            if (word[i] == word[j]) {
-                word_indexs[i] = j + 1;
+        if (word[i] == word[j]) {
+            ++j;
+            word_indexs[i] = j;
 
-                break;
+            continue;
+        }
+
+        if (i > 1 && j == 0) {
+            word_indexs[i] = 0;
+            continue;
+        }
+
+        if (i > 2) {
+            j = word_indexs[j - 2];
+        }
+    }
+
+    j = 0;
+    for (i = 0; i < str_len; ++i) {
+        while (j > 0 && str[i] != word[j]) {
+            j = word_indexs[j - 1];
+        }
+
+        if (str[i] == word[j]) {
+            if (j == word_len - 1) {
+                return i - j;
             }
 
-            j = word_indexs[j - 1];
+            ++j;
         }
     }
 
