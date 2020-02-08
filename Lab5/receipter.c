@@ -2,219 +2,224 @@
 #include <stdio.h>
 #include <string.h>
 #include <math.h>
+#include <assert.h>
 #include "receipter.h"
 
-#define MAX_ORDER_ITEM_COUNT (10)
 #define MAX_PRICE (999.99)
-#define MAX_MESSAGE_LENGTH (75)
-#define NULL_CHAR ('\0')
 
-static int s_order_number = 0;
-char g_order_names[MAX_ORDER_ITEM_COUNT][26];
-char (*g_order_names_p)[26] = g_order_names;
-double g_order_prices[10] = { 0.0, };
-double g_subtotal = 0;
-double g_tip = 0;
-char g_message[76];
+enum {
+    MAX_ITEM_COUNT = 10,
+    NAME_MAX_LENGTH = 25,
+    MESSAGE_MAX_LENGTH = 75,
+    MAX_ORDER_COUNT = 99999
+};
 
-int add_item(const char* name, double price) 
+static size_t s_order_number = 1;
+
+char g_item_names[MAX_ITEM_COUNT][NAME_MAX_LENGTH + 1];
+double g_item_prices[MAX_ITEM_COUNT];
+size_t g_item_count = 0;
+
+double g_tip = 0.0;
+char g_message[MESSAGE_MAX_LENGTH + 1];
+
+int add_item(const char* name, double price)
 {
-    size_t i;
-    size_t j;
-    size_t name_length;
-
-    /* validate order item count - up to 10 */
-    if (strlen(g_order_names[MAX_ORDER_ITEM_COUNT - 1]) > 0) { 
+    char* item_name;
+    size_t name_len;
+    if (g_item_count >= MAX_ITEM_COUNT || price > MAX_PRICE) {
         return FALSE;
     }
-    
-    name_length = strlen(name);
 
-    for (i = 0; i < MAX_ORDER_ITEM_COUNT; i++) {
-        if (strlen(g_order_names[i]) == 0) {
-            for (j = 0; j < name_length + 1; j++) {
-                if (j == name_length || j > 24) {
-                    g_order_names[i][j] = NULL_CHAR;
-                    break;
-                }
-
-                g_order_names[i][j] = name[j];
-            }
-
-            g_order_prices[i] = price;
-            g_subtotal += price;
-            break;
-        }
+    if (name == NULL || *name == '\0') {
+        return FALSE;
     }
+
+    name_len = strlen(name);
+    if (name_len >= NAME_MAX_LENGTH) {
+        name_len = NAME_MAX_LENGTH;
+    }
+
+    item_name = g_item_names[g_item_count];
+    memset(item_name, 0, NAME_MAX_LENGTH + 1);
+
+    strncpy(item_name, name, name_len + 1);
+    item_name[name_len] = '\0';
+
+    g_item_prices[g_item_count] = price;
+
+    ++g_item_count;
 
     return TRUE;
 }
 
-void add_tip(double tip) 
+void add_tip(double tip)
 {
-    if (fabs(tip) > 0.0001 && tip <= MAX_PRICE) {
-        g_tip = tip;
+    if (tip > MAX_PRICE) {
+        return;
     }
+
+    g_tip = tip;
 }
 
-void add_message(const char* message) 
+void add_message(const char* message)
 {
-    size_t i;
+    size_t message_len = strlen(message);
 
-    for (i = 0; i < MAX_MESSAGE_LENGTH; i++) {
-        g_message[i] = message[i];
-
-        if (message[i] == NULL_CHAR) {
-            break;
-        }
-
-        if (i == MAX_MESSAGE_LENGTH - 1) {
-            g_message[MAX_MESSAGE_LENGTH] = NULL_CHAR;
-        }
+    if (message_len >= MESSAGE_MAX_LENGTH) {
+        message_len = MESSAGE_MAX_LENGTH;
     }
+
+    memset(g_message, 0, MESSAGE_MAX_LENGTH + 1);
+
+    if (*message == '\0' || NULL) {
+        return;
+    }
+
+    strncpy(g_message, message, message_len + 1);
+    g_message[message_len] = '\0';
 }
 
-int print_receipt(const char* filename, time_t timestamp) 
+int print_receipt(const char* filename, time_t timestamp)
 {
-    const int MESSAGE_DIVIDE_LENGTH = 50;
-    const int LEFT_BODY_SIZE = 33;
-    const int RIGHT_BODY_SIZE = 17;
-    const char divider[52] = "--------------------------------------------------\n";
-    FILE* reciept;
+    FILE* file;
     struct tm* time_p;
     char time_buffer[20];
-    char temp_str[28];
-    char* temp_str_p = temp_str;
-    char body_left_buffer[40];
-    char body_right_buffer[20];
-    char temp_message_buffer[52];
+    char left_buffer[34];
+    char right_buffer[18];
+    char* left_buffer_p = left_buffer;
+    char* right_buffer_p = right_buffer;
+    const size_t LEFT_BUFFER_SIZE = 33;
+    const size_t RIGHT_BUFFER_SIZE = 17;
+    const size_t MESSAGE_DIVIDE_LENGTH = 50;
+    char price_str[7];
+    char* price_str_p = price_str;
+    double tax = 0.0;
+    double subtotal = 0.0;
+    double total = 0.0;
     size_t i;
-    double tax = 0;
-    double total = 0;
-    int message_length = 0;
+    size_t index;
+    size_t temp_len;
 
-    if (strlen(g_order_names[0]) == 0) {
+    if (filename == NULL) {
         return FALSE;
     }
 
-    reciept = fopen(filename, "w");
-
-    /* header section */ 
-
-    fprintf(reciept, "Charles' Seafood\n");
-    fprintf(reciept, divider);
-
-    sprintf(temp_str_p, "%05d", s_order_number++);
+    file = fopen(filename, "w");
 
     time_p = gmtime(&timestamp);
     strftime(time_buffer, sizeof(time_buffer), "%Y-%m-%d %H:%M:%S", time_p);
 
-    fprintf(reciept, "%s                          %s\n", time_buffer, temp_str_p);
+    fprintf(file, "Charles' Seafood\n--------------------------------------------------\n");
+    fprintf(file, "%s                          %05d\n--------------------------------------------------\n", time_buffer, s_order_number++);
+                printf("%d\n", g_item_count);
 
-    fprintf(reciept, divider);
-    
-    /* body section */ 
+    for (i = 0; i < g_item_count; ++i) {
+        temp_len = strlen(g_item_names[i]);
+        index = LEFT_BUFFER_SIZE - temp_len;
+        left_buffer_p = left_buffer_p + index;
+        strncpy(left_buffer_p, g_item_names[i], temp_len );
+        left_buffer_p[temp_len] = '\0';
 
-    for (i = 0; i < MAX_ORDER_ITEM_COUNT; i++) {
-        temp_str_p = g_order_names[i];
-        if (strlen(temp_str_p) != 0) {
-            append_string_to_buffer(temp_str_p, strlen(temp_str_p), body_left_buffer, LEFT_BODY_SIZE);
-            
-            sprintf(temp_str_p, "%5.2f", g_order_prices[i]);
-            append_string_to_buffer(temp_str_p, strlen(temp_str_p), body_right_buffer, RIGHT_BODY_SIZE);
+        printf("%s\n", left_buffer);
 
-            fprintf(reciept, "%s%s\n", body_left_buffer, body_right_buffer);
-        } else {
-            break;
-        }
+        sprintf(price_str_p, "%5.2f", g_item_prices[i]);
+        temp_len = strlen(price_str_p);
+        index = RIGHT_BUFFER_SIZE - temp_len - 1;
+        right_buffer_p = right_buffer_p + index;
+        strncpy(right_buffer_p, price_str_p, temp_len);
+        right_buffer_p[temp_len] = '\0';
+
+        printf("%s\n", right_buffer);        
+
+        fprintf(file, "%s%s\n", left_buffer, right_buffer);
+        left_buffer_p = left_buffer;
+        right_buffer_p = right_buffer;
+        subtotal += g_item_prices[i];
     }
-    fprintf(reciept, "\n");
-    
-    append_string_to_buffer("Subtotal", 8, body_left_buffer, LEFT_BODY_SIZE);
-    sprintf(temp_str, "%5.2f", g_subtotal);
-    append_string_to_buffer(temp_str, strlen(temp_str), body_right_buffer, RIGHT_BODY_SIZE);
+    fprintf(file, "\n");
 
-    fprintf(reciept, "%s%s\n", body_left_buffer, body_right_buffer);
+    sprintf(price_str_p, "%5.2f", subtotal);
+    temp_len = strlen(price_str_p);
+    index = RIGHT_BUFFER_SIZE - temp_len;
+    right_buffer_p = right_buffer_p + index;
+    strncpy(right_buffer_p, price_str_p, temp_len);
+
+    fprintf(file, "                         Subtotal%s\n", right_buffer);
+    right_buffer_p = right_buffer;
+
 
     if (g_tip != 0.0) {
-        append_string_to_buffer("Tip", 3, body_left_buffer, LEFT_BODY_SIZE);
-        sprintf(temp_str, "%5.2f", g_tip);
-        append_string_to_buffer(temp_str, strlen(temp_str), body_right_buffer, RIGHT_BODY_SIZE);
+        sprintf(price_str_p, "%5.2f", g_tip);
+        temp_len = strlen(price_str_p);
+        index = RIGHT_BUFFER_SIZE - temp_len;
+        right_buffer_p = right_buffer_p + index;
+        strncpy(right_buffer_p, price_str_p, temp_len);
 
-        fprintf(reciept, "%s%s\n", body_left_buffer, body_right_buffer);
+        fprintf(file, "                              Tip%s\n", right_buffer);
+        right_buffer_p = right_buffer;
     }
 
-    append_string_to_buffer("Tax", 3, body_left_buffer, LEFT_BODY_SIZE);
-    tax = g_subtotal * 0.05;
-    sprintf(temp_str, "%5.2f", tax);
-    append_string_to_buffer(temp_str, strlen(temp_str), body_right_buffer, RIGHT_BODY_SIZE);
+    tax = subtotal * 0.05;
+    sprintf(price_str_p, "%5.2f", tax);
+    temp_len = strlen(price_str_p);
+    index = RIGHT_BUFFER_SIZE - temp_len;
+    right_buffer_p = right_buffer_p + index;
+    strncpy(right_buffer_p, price_str_p, temp_len);
 
-    fprintf(reciept, "%s%s\n", body_left_buffer, body_right_buffer);
+    fprintf(file, "                              Tax%s\n", right_buffer);
+    right_buffer_p = right_buffer;
 
-    append_string_to_buffer("Total", 5, body_left_buffer, LEFT_BODY_SIZE);
-    total += g_subtotal;
+    total += subtotal;
     total += g_tip;
     total += tax;
-    sprintf(temp_str, "%5.2f", total);
-    append_string_to_buffer(temp_str, strlen(temp_str), body_right_buffer, RIGHT_BODY_SIZE);
+    sprintf(price_str_p, "%5.2f", total);
+    temp_len = strlen(price_str_p);
+    index = RIGHT_BUFFER_SIZE - temp_len;
+    right_buffer_p = right_buffer_p + index;
+    strncpy(right_buffer_p, price_str_p, temp_len);
 
-    fprintf(reciept, "%s%s\n", body_left_buffer, body_right_buffer);
+    fprintf(file, "                            Total%s\n", right_buffer);
+    right_buffer_p = right_buffer;
 
-    fprintf(reciept, "\n");
+    fprintf(file, "\n");
 
-    message_length = strlen(g_message);
-    if (message_length != 0) {
-        if (message_length > MESSAGE_DIVIDE_LENGTH) {
+    temp_len = strlen(g_message);
+    if (temp_len != 0) {
+        char temp_message_buffer[52];
+        char* temp_message_p;
+        if (temp_len > MESSAGE_DIVIDE_LENGTH) {
             strcpy(temp_message_buffer, g_message);
-            temp_message_buffer[MESSAGE_DIVIDE_LENGTH] = NULL_CHAR;
-            fprintf(reciept, "%s\n", temp_message_buffer);
+            temp_message_buffer[MESSAGE_DIVIDE_LENGTH] = '\0';
+            fprintf(file, "%s\n", temp_message_buffer);
 
-            temp_str_p = &g_message[MESSAGE_DIVIDE_LENGTH];
-            fprintf(reciept, "%s\n", temp_str_p);
+            temp_message_p = &g_message[MESSAGE_DIVIDE_LENGTH];
+            fprintf(file, "%s\n", temp_message_p);
         } else {
-            fprintf(reciept, "%s\n", g_message);
+            fprintf(file, "%s\n", g_message);
         }
+
+        right_buffer_p = right_buffer;
+        g_message[0] = '\0';
     }
     
     /* footer section */ 
 
-    fprintf(reciept, "==================================================\n");
-    fprintf(reciept, "                                        Tax#-51234");
+    fprintf(file, "==================================================\n                                        Tax#-51234");
 
-    fclose(reciept);
+    fclose(file);
 
     /* after print reciept must reset global variables */
-    for (i = 0; i < MAX_ORDER_ITEM_COUNT; i++) {
-        if (strlen(g_order_names[i]) != 0) {
-            g_order_names[i][0] = NULL_CHAR;
-            g_order_prices[i] = 0.0;
+    for (i = 0; i < g_item_count; i++) {
+        if (strlen(g_item_names[i]) != 0) {
+            g_item_names[i][0] = '\0';
+            g_item_prices[i] = 0.0;
         }
     }
 
-    g_subtotal = 0.0;
     if (g_tip != 0.0) {
         g_tip = 0.0;
     }
 
-    if (message_length != 0) {
-        g_message[0] = NULL_CHAR;
-    }
-
     return TRUE;
-}
-
-void append_string_to_buffer(char* str, int str_size, char* buffer, int buffer_size)
-{
-    int i;
-    int j;
-    
-    j = str_size;
-    for (i = buffer_size; i > -1; i--) {
-        if (j > -1) {
-            buffer[i] = str[j];
-            j--;
-        } else {
-            buffer[i] = ' ';
-        }
-    }
 }

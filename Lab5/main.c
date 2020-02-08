@@ -34,5 +34,6 @@ int main(void)
 
     assert(FALSE == print_receipt("receipt2.txt", time));
     
+    assert(0);
     return 0;
 }
