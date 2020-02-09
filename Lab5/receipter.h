@@ -14,4 +14,6 @@ void add_message(const char* message);
 
 int print_receipt(const char* filename, time_t timestamp);
 
+void print_to_file(FILE* f, const char* s, const size_t blank_size);
+
 #endif /* RECEIPTER_H */

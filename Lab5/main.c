@@ -10,7 +10,7 @@ int main(void)
     assert(TRUE == add_item("Magarita", 12.45222));
     assert(TRUE == add_item("Sharkfin soup", 500.12254));
     assert(TRUE == add_item("Kingcrab dip", 125.9999));
-    assert(TRUE == add_item("Deep fried scallops", 7.36));
+    assert(TRUE == add_item("Deep fried scallops FLOWWOWDLSADK", 7.36));
     assert(TRUE == add_item("Tacoyaki", 6.898));
     assert(TRUE == add_item("Salmon sashimi", 16.54));
     assert(TRUE == add_item("Tuna sashimi", 15.42));

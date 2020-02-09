@@ -60,27 +60,19 @@ void add_tip(double tip)
 
 void add_message(const char* message)
 {
-    size_t message_len = strlen(message);
+    size_t message_len;
 
-    if (message_len >= MESSAGE_MAX_LENGTH) {
-        message_len = MESSAGE_MAX_LENGTH;
+    if (message == NULL || *message == '\0') {
+        return;
     }
 
-    if (*message == '\0' || NULL) {
-        return;
+    message_len = strlen(message);
+    if (message_len > MESSAGE_MAX_LENGTH) {
+        message_len = MESSAGE_MAX_LENGTH;
     }
 
     strncpy(g_message, message, message_len + 1);
     g_message[message_len] = '\0';
-}
-
-void print_to_file(FILE* f, const char* s, const size_t blank_size)
-{
-    size_t i;
-    for (i = 0; i < blank_size; ++i) {
-        fprintf(f, " ");
-    }
-    fprintf(f, "%s", s);
 }
 
 int print_receipt(const char* filename, time_t timestamp)
@@ -113,25 +105,26 @@ int print_receipt(const char* filename, time_t timestamp)
 
     for (i = 0; i < g_item_count; ++i) {
         temp_len = strlen(g_item_names[i]);
-        
         print_to_file(file, g_item_names[i], LEFT_SECTION_SIZE - temp_len);
+        
         sprintf(price_str_p, "%5.2f\n", g_item_prices[i]);
         temp_len = strlen(price_str_p);
-
         print_to_file(file, price_str_p, RIGHT_SECTION_SIZE - temp_len);
 
         subtotal += g_item_prices[i];
     }
     fprintf(file, "\n");
 
-    fprintf(file, "                         Subtotal");
     sprintf(price_str_p, "%5.2f\n", subtotal);
     temp_len = strlen(price_str_p);
+
+    fprintf(file, "                         Subtotal");
     print_to_file(file, price_str_p, RIGHT_SECTION_SIZE - temp_len);
 
     if (g_tip != 0.0) {
         sprintf(price_str_p, "%5.2f\n", g_tip);
         temp_len = strlen(price_str_p);
+
         fprintf(file, "                              Tip");
         print_to_file(file, price_str_p, RIGHT_SECTION_SIZE - temp_len);
     }
@@ -156,10 +149,10 @@ int print_receipt(const char* filename, time_t timestamp)
 
     temp_len = strlen(g_message);
     if (temp_len != 0) {
-        char temp_message_buffer[52];
+        char temp_message_buffer[53];
         char* temp_message_p;
         if (temp_len > MESSAGE_DIVIDE_LENGTH) {
-            strcpy(temp_message_buffer, g_message);
+            strncpy(temp_message_buffer, g_message, MESSAGE_DIVIDE_LENGTH + 1);
             temp_message_buffer[MESSAGE_DIVIDE_LENGTH] = '\0';
             fprintf(file, "%s\n", temp_message_buffer);
 
@@ -189,4 +182,13 @@ int print_receipt(const char* filename, time_t timestamp)
     }
 
     return TRUE;
+}
+
+void print_to_file(FILE* f, const char* s, const size_t blank_size)
+{
+    size_t i;
+    for (i = 0; i < blank_size; ++i) {
+        fprintf(f, " ");
+    }
+    fprintf(f, "%s", s);
 }
