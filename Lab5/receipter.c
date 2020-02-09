@@ -14,7 +14,7 @@ enum {
     MAX_ORDER_COUNT = 99999
 };
 
-static size_t s_order_number = 1;
+static size_t s_order_number = 0;
 
 char g_item_names[MAX_ITEM_COUNT][NAME_MAX_LENGTH + 1];
 double g_item_prices[MAX_ITEM_COUNT];
@@ -80,17 +80,22 @@ void add_message(const char* message)
     g_message[message_len] = '\0';
 }
 
+void print_to_file(FILE* f, const char* s, const size_t blank_size)
+{
+    size_t i;
+    for (i = 0; i < blank_size; ++i) {
+        fprintf(f, " ");
+    }
+    fprintf(f, "%s", s);
+}
+
 int print_receipt(const char* filename, time_t timestamp)
 {
     FILE* file;
     struct tm* time_p;
     char time_buffer[20];
-    char left_buffer[34];
-    char right_buffer[18];
-    char* left_buffer_p = left_buffer;
-    char* right_buffer_p = right_buffer;
     const size_t LEFT_BUFFER_SIZE = 33;
-    const size_t RIGHT_BUFFER_SIZE = 17;
+    const size_t RIGHT_BUFFER_SIZE = 18;
     const size_t MESSAGE_DIVIDE_LENGTH = 50;
     char price_str[7];
     char* price_str_p = price_str;
@@ -101,7 +106,7 @@ int print_receipt(const char* filename, time_t timestamp)
     size_t index;
     size_t temp_len;
 
-    if (filename == NULL) {
+    if (filename == NULL || g_item_count == 0) {
         return FALSE;
     }
 
@@ -112,75 +117,47 @@ int print_receipt(const char* filename, time_t timestamp)
 
     fprintf(file, "Charles' Seafood\n--------------------------------------------------\n");
     fprintf(file, "%s                          %05d\n--------------------------------------------------\n", time_buffer, s_order_number++);
-                printf("%d\n", g_item_count);
 
     for (i = 0; i < g_item_count; ++i) {
         temp_len = strlen(g_item_names[i]);
-        index = LEFT_BUFFER_SIZE - temp_len;
-        left_buffer_p = left_buffer_p + index;
-        strncpy(left_buffer_p, g_item_names[i], temp_len );
-        left_buffer_p[temp_len] = '\0';
-
-        printf("%s\n", left_buffer);
-
-        sprintf(price_str_p, "%5.2f", g_item_prices[i]);
+        
+        print_to_file(file, g_item_names[i], LEFT_BUFFER_SIZE - temp_len);
+        sprintf(price_str_p, "%5.2f\n", g_item_prices[i]);
         temp_len = strlen(price_str_p);
-        index = RIGHT_BUFFER_SIZE - temp_len - 1;
-        right_buffer_p = right_buffer_p + index;
-        strncpy(right_buffer_p, price_str_p, temp_len);
-        right_buffer_p[temp_len] = '\0';
 
-        printf("%s\n", right_buffer);        
+        print_to_file(file, price_str_p, RIGHT_BUFFER_SIZE - temp_len);
 
-        fprintf(file, "%s%s\n", left_buffer, right_buffer);
-        left_buffer_p = left_buffer;
-        right_buffer_p = right_buffer;
         subtotal += g_item_prices[i];
     }
     fprintf(file, "\n");
 
-    sprintf(price_str_p, "%5.2f", subtotal);
+    fprintf(file, "                         Subtotal");
+    sprintf(price_str_p, "%5.2f\n", subtotal);
     temp_len = strlen(price_str_p);
-    index = RIGHT_BUFFER_SIZE - temp_len;
-    right_buffer_p = right_buffer_p + index;
-    strncpy(right_buffer_p, price_str_p, temp_len);
-
-    fprintf(file, "                         Subtotal%s\n", right_buffer);
-    right_buffer_p = right_buffer;
-
+    print_to_file(file, price_str_p, RIGHT_BUFFER_SIZE - temp_len);
 
     if (g_tip != 0.0) {
-        sprintf(price_str_p, "%5.2f", g_tip);
+        sprintf(price_str_p, "%5.2f\n", g_tip);
         temp_len = strlen(price_str_p);
-        index = RIGHT_BUFFER_SIZE - temp_len;
-        right_buffer_p = right_buffer_p + index;
-        strncpy(right_buffer_p, price_str_p, temp_len);
-
-        fprintf(file, "                              Tip%s\n", right_buffer);
-        right_buffer_p = right_buffer;
+        fprintf(file, "                              Tip");
+        print_to_file(file, price_str_p, RIGHT_BUFFER_SIZE - temp_len);
     }
 
     tax = subtotal * 0.05;
-    sprintf(price_str_p, "%5.2f", tax);
+    sprintf(price_str_p, "%5.2f\n", tax);
     temp_len = strlen(price_str_p);
-    index = RIGHT_BUFFER_SIZE - temp_len;
-    right_buffer_p = right_buffer_p + index;
-    strncpy(right_buffer_p, price_str_p, temp_len);
 
-    fprintf(file, "                              Tax%s\n", right_buffer);
-    right_buffer_p = right_buffer;
+    fprintf(file, "                              Tax");
+    print_to_file(file, price_str_p, RIGHT_BUFFER_SIZE - temp_len);
 
     total += subtotal;
     total += g_tip;
     total += tax;
-    sprintf(price_str_p, "%5.2f", total);
+    sprintf(price_str_p, "%5.2f\n", total);
     temp_len = strlen(price_str_p);
-    index = RIGHT_BUFFER_SIZE - temp_len;
-    right_buffer_p = right_buffer_p + index;
-    strncpy(right_buffer_p, price_str_p, temp_len);
 
-    fprintf(file, "                            Total%s\n", right_buffer);
-    right_buffer_p = right_buffer;
+    fprintf(file, "                            Total");
+    print_to_file(file, price_str_p, RIGHT_BUFFER_SIZE - temp_len);
 
     fprintf(file, "\n");
 
@@ -199,7 +176,6 @@ int print_receipt(const char* filename, time_t timestamp)
             fprintf(file, "%s\n", g_message);
         }
 
-        right_buffer_p = right_buffer;
         g_message[0] = '\0';
     }
     
@@ -216,6 +192,8 @@ int print_receipt(const char* filename, time_t timestamp)
             g_item_prices[i] = 0.0;
         }
     }
+
+    g_item_count = 0;
 
     if (g_tip != 0.0) {
         g_tip = 0.0;
