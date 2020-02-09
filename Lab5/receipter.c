@@ -1,8 +1,6 @@
-#include <time.h>
 #include <stdio.h>
 #include <string.h>
 #include <math.h>
-#include <assert.h>
 #include "receipter.h"
 
 #define MAX_PRICE (999.99)
@@ -41,8 +39,6 @@ int add_item(const char* name, double price)
     }
 
     item_name = g_item_names[g_item_count];
-    memset(item_name, 0, NAME_MAX_LENGTH + 1);
-
     strncpy(item_name, name, name_len + 1);
     item_name[name_len] = '\0';
 
@@ -70,8 +66,6 @@ void add_message(const char* message)
         message_len = MESSAGE_MAX_LENGTH;
     }
 
-    memset(g_message, 0, MESSAGE_MAX_LENGTH + 1);
-
     if (*message == '\0' || NULL) {
         return;
     }
@@ -91,19 +85,18 @@ void print_to_file(FILE* f, const char* s, const size_t blank_size)
 
 int print_receipt(const char* filename, time_t timestamp)
 {
+    const size_t LEFT_SECTION_SIZE = 33;
+    const size_t RIGHT_SECTION_SIZE = 18;
+    const size_t MESSAGE_DIVIDE_LENGTH = 50;
     FILE* file;
     struct tm* time_p;
     char time_buffer[20];
-    const size_t LEFT_BUFFER_SIZE = 33;
-    const size_t RIGHT_BUFFER_SIZE = 18;
-    const size_t MESSAGE_DIVIDE_LENGTH = 50;
     char price_str[7];
     char* price_str_p = price_str;
     double tax = 0.0;
     double subtotal = 0.0;
     double total = 0.0;
     size_t i;
-    size_t index;
     size_t temp_len;
 
     if (filename == NULL || g_item_count == 0) {
@@ -121,11 +114,11 @@ int print_receipt(const char* filename, time_t timestamp)
     for (i = 0; i < g_item_count; ++i) {
         temp_len = strlen(g_item_names[i]);
         
-        print_to_file(file, g_item_names[i], LEFT_BUFFER_SIZE - temp_len);
+        print_to_file(file, g_item_names[i], LEFT_SECTION_SIZE - temp_len);
         sprintf(price_str_p, "%5.2f\n", g_item_prices[i]);
         temp_len = strlen(price_str_p);
 
-        print_to_file(file, price_str_p, RIGHT_BUFFER_SIZE - temp_len);
+        print_to_file(file, price_str_p, RIGHT_SECTION_SIZE - temp_len);
 
         subtotal += g_item_prices[i];
     }
@@ -134,13 +127,13 @@ int print_receipt(const char* filename, time_t timestamp)
     fprintf(file, "                         Subtotal");
     sprintf(price_str_p, "%5.2f\n", subtotal);
     temp_len = strlen(price_str_p);
-    print_to_file(file, price_str_p, RIGHT_BUFFER_SIZE - temp_len);
+    print_to_file(file, price_str_p, RIGHT_SECTION_SIZE - temp_len);
 
     if (g_tip != 0.0) {
         sprintf(price_str_p, "%5.2f\n", g_tip);
         temp_len = strlen(price_str_p);
         fprintf(file, "                              Tip");
-        print_to_file(file, price_str_p, RIGHT_BUFFER_SIZE - temp_len);
+        print_to_file(file, price_str_p, RIGHT_SECTION_SIZE - temp_len);
     }
 
     tax = subtotal * 0.05;
@@ -148,7 +141,7 @@ int print_receipt(const char* filename, time_t timestamp)
     temp_len = strlen(price_str_p);
 
     fprintf(file, "                              Tax");
-    print_to_file(file, price_str_p, RIGHT_BUFFER_SIZE - temp_len);
+    print_to_file(file, price_str_p, RIGHT_SECTION_SIZE - temp_len);
 
     total += subtotal;
     total += g_tip;
@@ -157,7 +150,7 @@ int print_receipt(const char* filename, time_t timestamp)
     temp_len = strlen(price_str_p);
 
     fprintf(file, "                            Total");
-    print_to_file(file, price_str_p, RIGHT_BUFFER_SIZE - temp_len);
+    print_to_file(file, price_str_p, RIGHT_SECTION_SIZE - temp_len);
 
     fprintf(file, "\n");
 
@@ -178,8 +171,6 @@ int print_receipt(const char* filename, time_t timestamp)
 
         g_message[0] = '\0';
     }
-    
-    /* footer section */ 
 
     fprintf(file, "==================================================\n                                        Tax#-51234");
 
@@ -187,10 +178,8 @@ int print_receipt(const char* filename, time_t timestamp)
 
     /* after print reciept must reset global variables */
     for (i = 0; i < g_item_count; i++) {
-        if (strlen(g_item_names[i]) != 0) {
-            g_item_names[i][0] = '\0';
-            g_item_prices[i] = 0.0;
-        }
+        g_item_names[i][0] = '\0';
+        g_item_prices[i] = 0.0;
     }
 
     g_item_count = 0;
